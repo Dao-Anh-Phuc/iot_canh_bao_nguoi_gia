@@ -1,0 +1,25 @@
+{
+  "name": "iot-canh-bao-nguoi-gia",
+  "version": "1.0.0",
+  "description": "IoT Emergency Alert System",
+  "main": "server.js",
+  "scripts": {
+    "start": "node data/backend/server.js",
+    "dev": "nodemon data/backend/server.js",
+    "build": "echo 'No build step required'"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "pg": "^8.11.3",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
