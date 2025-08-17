@@ -5,6 +5,9 @@ require('dotenv').config();  // Đọc các biến môi trường từ .env
 // Tạo pool kết nối với PostgreSQL
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,  // Đọc từ biến môi trường
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 // Kiểm tra kết nối tới cơ sở dữ liệu
