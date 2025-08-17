@@ -4,19 +4,20 @@
 #include <ArduinoJson.h>
 
 // Cấu hình WiFi
-const char* ssid = "YOUR_WIFI_SSID";
-const char* password = "YOUR_WIFI_PASSWORD";
+const char* ssid = "Tang 2";
+const char* password = "88888888";
 
 // API Configuration
-const char* API_BASE_URL = "https://your-iot-app.onrender.com"; // Thay bằng Render URL sau khi deploy
-const char* DEVICE_ID = "ESP32_001"; // Unique device ID
+const char* API_BASE_URL = "https://iot-backend-346j.onrender.com";
+const char* DEVICE_ID = "esp32_001"; // Unique device ID
 
 // Button configuration
 const int BUTTON_PIN = 2;
 bool buttonPressed = false;
 unsigned long lastButtonPress = 0;
 const unsigned long DEBOUNCE_DELAY = 1000; // 1 second debounce
-
+void sendAlert();
+void checkCommandFromBackend();
 void setup() {
   Serial.begin(115200);
   
@@ -34,21 +35,49 @@ void setup() {
   Serial.println(WiFi.localIP());
 }
 
+unsigned long lastCommandCheck = 0;
+const unsigned long COMMAND_CHECK_INTERVAL = 5000; // 5 giây
+
 void loop() {
-  // Check button press
-  if (digitalRead(BUTTON_PIN) == LOW && !buttonPressed) {
-    unsigned long currentTime = millis();
-    if (currentTime - lastButtonPress > DEBOUNCE_DELAY) {
-      buttonPressed = true;
-      lastButtonPress = currentTime;
-      Serial.println("Button pressed! Sending alert...");
+  // Test: gửi alert khi nhập ký tự '1' từ Serial
+  if (Serial.available()) {
+    char c = Serial.read();
+    if (c == '1') {
+      Serial.println("Serial input '1' detected! Sending alert...");
       sendAlert();
     }
-  } else if (digitalRead(BUTTON_PIN) == HIGH) {
-    buttonPressed = false;
   }
-  
+
+  // Poll lệnh từ backend mỗi 5 giây
+  if (millis() - lastCommandCheck > COMMAND_CHECK_INTERVAL) {
+    lastCommandCheck = millis();
+    checkCommandFromBackend();
+  }
   delay(100);
+}
+void checkCommandFromBackend() {
+  HTTPClient http;
+  String url = String(API_BASE_URL) + "/auth/devices/" + DEVICE_ID + "/command";
+  http.begin(url);
+  int httpCode = http.GET();
+  if (httpCode == 200) {
+    String payload = http.getString();
+    JsonDocument doc;
+    DeserializationError error = deserializeJson(doc, payload);
+    if (!error) {
+      String command = doc["command"].as<String>();
+      Serial.println("Received command: " + command);
+      // Thực hiện lệnh nếu cần
+      if (command == "call_user") {
+        sendAlert();
+      }
+    } else {
+      Serial.println("JSON parsing failed (command)");
+    }
+  } else {
+    Serial.printf("HTTP GET command failed, code: %d\n", httpCode);
+  }
+  http.end();
 }
 
 String getPhoneNumber() {

@@ -9,7 +9,7 @@ window.onload = async () => {
   // API Base URL - sẽ thay bằng Render URL sau khi deploy
   const API_BASE = window.location.hostname === 'localhost' 
     ? 'http://localhost:3000' 
-    : 'https://your-iot-app.onrender.com'; // Thay bằng Render URL
+    : 'https://iot-backend-346j.onrender.com'; // Thay bằng Render URL
 
   // Chuyển đổi giữa login và register
   document.getElementById('show-register').onclick = () => {
@@ -65,7 +65,7 @@ window.onload = async () => {
     phoneSection.style.display = 'none';
 
     // Lấy thông tin user
-    const profileRes = await fetch('http://localhost:3000/auth/profile', {
+  const profileRes = await fetch(`${API_BASE}/auth/profile`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` }
     });
@@ -79,7 +79,7 @@ window.onload = async () => {
     document.getElementById('device-id-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const deviceId = document.getElementById('input-device-id').value;
-      const deviceRes = await fetch(`http://localhost:3000/auth/devices/${deviceId}`, {
+  const deviceRes = await fetch(`${API_BASE}/auth/devices/${deviceId}`, {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -106,7 +106,8 @@ window.onload = async () => {
       e.preventDefault();
       const phone_number = document.getElementById('input-phone-number').value;
       const deviceId = window.currentDeviceId;
-      const res = await fetch(`http://localhost:3000/auth/devices/${deviceId}/phone`, {
+      // Cập nhật số điện thoại lên backend
+      const res = await fetch(`${API_BASE}/auth/devices/${deviceId}/phone`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -117,6 +118,12 @@ window.onload = async () => {
       const result = await res.json();
       if (result.device) {
         document.getElementById('phone-message').innerText = 'Phone number updated!';
+        // Gửi lệnh tới ESP32 để nó nhận số điện thoại mới
+        await fetch(`${API_BASE}/auth/devices/${deviceId}/command`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ command: 'call_user' })
+        });
       } else {
         document.getElementById('phone-message').innerText = result.message || 'Error updating phone number';
       }
@@ -138,7 +145,7 @@ window.onload = async () => {
       e.preventDefault();
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
-      const response = await fetch('http://localhost:3000/auth/login', {
+      const response = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
