@@ -113,4 +113,36 @@ router.get('/alerts/:deviceId', authMiddleware, async (req, res) => {
   }
 });
 
+
+// Đặt lệnh cho thiết bị
+router.post('/devices/:deviceId/command', async (req, res) => {
+  const { deviceId } = req.params;
+  const { command } = req.body;
+  try {
+    await pool.query(
+      'UPDATE devices SET command = $1 WHERE device_id = $2',
+      [command, deviceId]
+    );
+    res.json({ message: 'Command updated' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error updating command' });
+  }
+});
+
+// Lấy lệnh mới cho thiết bị
+router.get('/devices/:deviceId/command', async (req, res) => {
+  const { deviceId } = req.params;
+  try {
+    const result = await pool.query(
+      'SELECT command FROM devices WHERE device_id = $1',
+      [deviceId]
+    );
+    if (result.rowCount === 0) return res.status(404).json({ message: 'Device not found' });
+    res.json({ command: result.rows[0].command });
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching command' });
+  }
+});
 module.exports = router;
+
+
