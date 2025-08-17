@@ -69,3 +69,11 @@ npm run dev
 - `GET /auth/devices/:deviceId/phone` - Lấy số phone (cho ESP32)
 - `PUT /auth/devices/:deviceId/phone` - Cập nhật số phone
 - `POST /auth/alerts` - Log alert từ ESP32
+
+## cách up code mới (ví dụ up file index.js) 
+Để thêm file vào commit, hãy dùng:
+git add data/frontend/index.js
+commit lại:
+git commit -m "Update: gửi lệnh tới ESP32 khi đổi số điện thoại"
+push lên git:
+git push origin master
