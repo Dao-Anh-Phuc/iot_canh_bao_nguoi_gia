@@ -41,8 +41,8 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
-// Catch-all handler: serve frontend cho tất cả routes không tìm thấy
-app.get('*', (req, res) => {
+// Catch-all: chỉ trả về frontend cho các route không phải API
+app.get(/^\/(?!auth|health).*/, (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
